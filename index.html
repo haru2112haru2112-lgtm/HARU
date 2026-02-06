@@ -1,10 +1,129 @@
 <!DOCTYPE html>
-<html>
+<html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <title>テスト</title>
+<meta charset="UTF-8">
+<title>抵抗カラーコード計算機（4本帯 / 5本帯対応）</title>
+<style>
+body{
+  font-family: sans-serif;
+  text-align:center;
+  background:#f2f2f2;
+}
+select,button{
+  padding:8px;
+  margin:5px;
+  font-size:16px;
+}
+#result{
+  margin-top:20px;
+  font-size:22px;
+  font-weight:bold;
+}
+</style>
 </head>
 <body>
-  <h1>うごいた！</h1>
+
+<h1>抵抗カラーコード計算機</h1>
+
+<label>帯の本数：</label>
+<select id="type" onchange="updateBands()">
+  <option value="4">4本帯</option>
+  <option value="5">5本帯</option>
+</select>
+
+<div id="bands"></div>
+
+<div id="result"></div>
+
+<script>
+
+const colors = {
+  black:{digit:0,mul:1,tol:null},
+  brown:{digit:1,mul:10,tol:1},
+  red:{digit:2,mul:100,tol:2},
+  orange:{digit:3,mul:1000,tol:null},
+  yellow:{digit:4,mul:10000,tol:null},
+  green:{digit:5,mul:100000,tol:0.5},
+  blue:{digit:6,mul:1000000,tol:0.25},
+  violet:{digit:7,mul:10000000,tol:0.1},
+  gray:{digit:8,mul:100000000,tol:0.05},
+  white:{digit:9,mul:1000000000,tol:null},
+  gold:{digit:null,mul:0.1,tol:5},
+  silver:{digit:null,mul:0.01,tol:10}
+};
+
+const colorNames = {
+  black:"黒",brown:"茶",red:"赤",orange:"橙",yellow:"黄",
+  green:"緑",blue:"青",violet:"紫",gray:"灰",white:"白",
+  gold:"金",silver:"銀"
+};
+
+function createSelect(id, mode){
+  let s = `<select id="${id}" onchange="calculate()">`;
+  for(let c in colors){
+    if(mode==="digit" && colors[c].digit===null) continue;
+    if(mode==="tol" && colors[c].tol===null) continue;
+    s += `<option value="${c}">${colorNames[c]}</option>`;
+  }
+  s += `</select>`;
+  return s;
+}
+
+function updateBands(){
+  let type = document.getElementById("type").value;
+  let html="";
+
+  if(type==="4"){
+    html += createSelect("b1","digit");
+    html += createSelect("b2","digit");
+    html += createSelect("b3","mul");
+    html += createSelect("b4","tol");
+  }else{
+    html += createSelect("b1","digit");
+    html += createSelect("b2","digit");
+    html += createSelect("b3","digit");
+    html += createSelect("b4","mul");
+    html += createSelect("b5","tol");
+  }
+
+  document.getElementById("bands").innerHTML = html;
+  calculate();
+}
+
+function calculate(){
+  let type = document.getElementById("type").value;
+  let value=0;
+  let tol=0;
+
+  if(type==="4"){
+    let d1 = colors[b1.value].digit;
+    let d2 = colors[b2.value].digit;
+    let mul = colors[b3.value].mul;
+    tol = colors[b4.value].tol;
+    value = (d1*10 + d2) * mul;
+  }else{
+    let d1 = colors[b1.value].digit;
+    let d2 = colors[b2.value].digit;
+    let d3 = colors[b3.value].digit;
+    let mul = colors[b4.value].mul;
+    tol = colors[b5.value].tol;
+    value = (d1*100 + d2*10 + d3) * mul;
+  }
+
+  document.getElementById("result").innerHTML =
+    format(value) + " Ω ±" + tol + "%";
+}
+
+function format(num){
+  if(num>=1000000) return (num/1000000)+" MΩ";
+  if(num>=1000) return (num/1000)+" kΩ";
+  return num+" Ω";
+}
+
+updateBands();
+
+</script>
+
 </body>
 </html>
+
